@@ -1,0 +1,76 @@
+'use client'
+
+import type { Metadata } from 'next'
+import { useState } from 'react'
+
+// Note: metadata export doesn't work in 'use client' files.
+// Move to a server wrapper if needed.
+
+export default function LoginPage() {
+  const [error, setError] = useState<string | null>(null)
+
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault()
+    const form = e.currentTarget
+    const email = (form.elements.namedItem('email') as HTMLInputElement).value
+    const password = (form.elements.namedItem('password') as HTMLInputElement).value
+
+    // TODO: const supabase = createClient()
+    // TODO: const { error } = await supabase.auth.signInWithPassword({ email, password })
+    // TODO: if (error) setError(error.message)
+    // TODO: else redirect to '/'
+
+    setError(null)
+    console.log('Login stub:', { email, password })
+  }
+
+  return (
+    <div className="p-4 max-w-md mx-auto">
+      <h1 className="text-2xl font-bold mb-4">Log In</h1>
+
+      {error && (
+        <div role="alert" className="mb-4 text-red-700 border border-red-700 p-2">
+          {error}
+        </div>
+      )}
+
+      <form onSubmit={handleSubmit} noValidate>
+        <div className="mb-3">
+          <label htmlFor="email" className="block mb-1">
+            Email
+          </label>
+          <input
+            id="email"
+            type="email"
+            name="email"
+            aria-required="true"
+            autoComplete="email"
+            className="border p-2 w-full"
+          />
+        </div>
+
+        <div className="mb-4">
+          <label htmlFor="password" className="block mb-1">
+            Password
+          </label>
+          <input
+            id="password"
+            type="password"
+            name="password"
+            aria-required="true"
+            autoComplete="current-password"
+            className="border p-2 w-full"
+          />
+        </div>
+
+        <button type="submit" className="px-4 py-2 bg-blue-600 text-white">
+          Log In
+        </button>
+      </form>
+
+      <p className="mt-4">
+        Don&apos;t have an account? <a href="/signup">Sign up</a>
+      </p>
+    </div>
+  )
+}

@@ -1,0 +1,39 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Skip link: visually hidden until focused */
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: auto;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+.skip-link:focus {
+  position: static;
+  width: auto;
+  height: auto;
+  padding: 0.5rem 1rem;
+  background: #000;
+  color: #fff;
+  z-index: 9999;
+}
+
+/* High contrast mode */
+html.high-contrast {
+  background-color: #000000;
+  color: #ffffff;
+}
+
+html.high-contrast a,
+html.high-contrast button {
+  color: #ffff00;
+}
+
+html.high-contrast :focus {
+  outline: 3px solid #ffff00;
+  outline-offset: 2px;
+}
