@@ -1,4 +1,4 @@
-import { createClient as supabaseCreateClient } from '@supabase/supabase-js'
+import { createBrowserClient } from '@supabase/ssr'
 
 export type Profile = {
   id: string
@@ -26,7 +26,8 @@ export type Step = {
 }
 
 export function createClient() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL!
-  const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!
-  return supabaseCreateClient(url, key)
+  return createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!
+  )
 }
