@@ -16,7 +16,13 @@ export default function SignupPage() {
     const password = (form.elements.namedItem('password') as HTMLInputElement).value
 
     const supabase = createClient()
-    const { data, error: signUpError } = await supabase.auth.signUp({ email, password })
+    const { data, error: signUpError } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        emailRedirectTo: `${window.location.origin}`,
+      },
+    })
     if (signUpError) { setError(signUpError.message); return }
     await supabase.from('profiles').insert({ id: data.user!.id, display_name: displayName })
     router.push('/')
