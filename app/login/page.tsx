@@ -1,13 +1,12 @@
 'use client'
 
-import type { Metadata } from 'next'
 import { useState } from 'react'
-
-// Note: metadata export doesn't work in 'use client' files.
-// Move to a server wrapper if needed.
+import { useRouter } from 'next/navigation'
+import { createClient } from '@/lib/supabase'
 
 export default function LoginPage() {
   const [error, setError] = useState<string | null>(null)
+  const router = useRouter()
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -15,13 +14,10 @@ export default function LoginPage() {
     const email = (form.elements.namedItem('email') as HTMLInputElement).value
     const password = (form.elements.namedItem('password') as HTMLInputElement).value
 
-    // TODO: const supabase = createClient()
-    // TODO: const { error } = await supabase.auth.signInWithPassword({ email, password })
-    // TODO: if (error) setError(error.message)
-    // TODO: else redirect to '/'
-
-    setError(null)
-    console.log('Login stub:', { email, password })
+    const supabase = createClient()
+    const { error } = await supabase.auth.signInWithPassword({ email, password })
+    if (error) { setError(error.message); return }
+    router.push('/')
   }
 
   return (
