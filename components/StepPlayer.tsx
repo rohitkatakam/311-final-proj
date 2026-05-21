@@ -1,23 +1,27 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import type { Step } from '@/lib/supabase'
 
 type Props = {
   steps: Step[]
 }
 
-function speak(text: string) {
-  window.speechSynthesis.cancel()
-  const utterance = new SpeechSynthesisUtterance(text)
-  utterance.rate = 0.9
-  utterance.pitch = 1
-  window.speechSynthesis.speak(utterance)
+function speakAndWait(text: string): Promise<void> {
+  return new Promise((resolve) => {
+    window.speechSynthesis.cancel()
+    const utterance = new SpeechSynthesisUtterance(text)
+    utterance.rate = 0.9
+    utterance.pitch = 1
+    utterance.onend = () => resolve()
+    window.speechSynthesis.speak(utterance)
+  })
 }
 
 export default function StepPlayer({ steps }: Props) {
   const [speaking, setSpeaking] = useState(false)
   const [currentStepTitle, setCurrentStepTitle] = useState<string | null>(null)
+  const stopRef = useRef(false)
 
   function readStep(step: Step) {
     const text = step.audio_hint
@@ -25,27 +29,35 @@ export default function StepPlayer({ steps }: Props) {
       : step.content
     setCurrentStepTitle(step.title)
     setSpeaking(true)
-    speak(text)
-    // TODO: set speaking to false when utterance ends via utterance.onend
+    window.speechSynthesis.cancel()
+    const utterance = new SpeechSynthesisUtterance(text)
+    utterance.rate = 0.9
+    utterance.pitch = 1
+    utterance.onend = () => {
+      setSpeaking(false)
+    }
+    window.speechSynthesis.speak(utterance)
   }
 
   async function readAll() {
-    // TODO: speak steps in sequence with a pause between each
-    // For now, read the first step as a stub
     if (steps.length === 0) return
+    stopRef.current = false
     setSpeaking(true)
     for (const step of steps) {
+      if (stopRef.current) break
       setCurrentStepTitle(step.title)
       const text = step.audio_hint
         ? `${step.content}. ${step.audio_hint}`
         : step.content
-      speak(text)
-      // TODO: await utterance end before proceeding to next step
-      break // stub: only reads first step
+      await speakAndWait(text)
+      await new Promise((r) => setTimeout(r, 600))
     }
+    setSpeaking(false)
+    setCurrentStepTitle(null)
   }
 
   function stopReading() {
+    stopRef.current = true
     window.speechSynthesis.cancel()
     setSpeaking(false)
     setCurrentStepTitle(null)
