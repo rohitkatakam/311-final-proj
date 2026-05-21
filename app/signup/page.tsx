@@ -1,9 +1,12 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { createClient } from '@/lib/supabase'
 
 export default function SignupPage() {
   const [error, setError] = useState<string | null>(null)
+  const router = useRouter()
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -12,14 +15,11 @@ export default function SignupPage() {
     const email = (form.elements.namedItem('email') as HTMLInputElement).value
     const password = (form.elements.namedItem('password') as HTMLInputElement).value
 
-    // TODO: const supabase = createClient()
-    // TODO: const { data, error: signUpError } = await supabase.auth.signUp({ email, password })
-    // TODO: if (signUpError) { setError(signUpError.message); return }
-    // TODO: await supabase.from('profiles').insert({ id: data.user!.id, display_name: displayName })
-    // TODO: redirect to '/'
-
-    setError(null)
-    console.log('Signup stub:', { displayName, email, password })
+    const supabase = createClient()
+    const { data, error: signUpError } = await supabase.auth.signUp({ email, password })
+    if (signUpError) { setError(signUpError.message); return }
+    await supabase.from('profiles').insert({ id: data.user!.id, display_name: displayName })
+    router.push('/')
   }
 
   return (
