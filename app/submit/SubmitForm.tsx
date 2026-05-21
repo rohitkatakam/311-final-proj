@@ -1,6 +1,10 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { Session } from '@supabase/supabase-js'
+import { createClient } from '@/lib/supabase'
+import { slugify } from '@/lib/slugify'
 
 type StepDraft = {
   title: string
@@ -8,11 +12,13 @@ type StepDraft = {
   audio_hint: string
 }
 
-export default function SubmitForm() {
+export default function SubmitForm({ session }: { session: Session }) {
   const [steps, setSteps] = useState<StepDraft[]>([
     { title: '', content: '', audio_hint: '' },
   ])
   const [error, setError] = useState<string | null>(null)
+  const [submitting, setSubmitting] = useState(false)
+  const router = useRouter()
 
   function addStep() {
     setSteps((prev) => [...prev, { title: '', content: '', audio_hint: '' }])
@@ -30,19 +36,46 @@ export default function SubmitForm() {
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
+    setSubmitting(true)
+    setError(null)
+
     const form = e.currentTarget
     const title = (form.elements.namedItem('title') as HTMLInputElement).value
     const description = (form.elements.namedItem('description') as HTMLTextAreaElement).value
     const tagsRaw = (form.elements.namedItem('tags') as HTMLInputElement).value
 
-    // TODO: const supabase = createClient()
-    // TODO: const slug = slugify(title)
-    // TODO: const tags = tagsRaw.split(',').map(t => t.trim()).filter(Boolean)
-    // TODO: insert tutorial row, then insert steps in order
-    // TODO: redirect to /tutorials/[slug] on success
+    const supabase = createClient()
+    const slug = slugify(title)
+    const tags = tagsRaw.split(',').map(t => t.trim()).filter(Boolean)
 
-    setError(null)
-    console.log('Submit stub:', { title, description, tagsRaw, steps })
+    const { data: tutorial, error: tutorialError } = await supabase
+      .from('tutorials')
+      .insert({ title, slug, description, tags, author_id: session.user.id })
+      .select()
+      .single()
+
+    if (tutorialError) {
+      setError(tutorialError.message)
+      setSubmitting(false)
+      return
+    }
+
+    const stepRows = steps.map((step, i) => ({
+      tutorial_id: tutorial.id,
+      step_order: i + 1,
+      title: step.title,
+      content: step.content,
+      audio_hint: step.audio_hint || null,
+    }))
+
+    const { error: stepsError } = await supabase.from('steps').insert(stepRows)
+    if (stepsError) {
+      setError(stepsError.message)
+      setSubmitting(false)
+      return
+    }
+
+    router.push(`/tutorials/${slug}`)
   }
 
   return (
@@ -161,8 +194,12 @@ export default function SubmitForm() {
         </button>
       </fieldset>
 
-      <button type="submit" className="px-4 py-2 bg-blue-600 text-white">
-        Submit Tutorial
+      <button
+        type="submit"
+        disabled={submitting}
+        className="px-4 py-2 bg-blue-600 text-white disabled:opacity-50"
+      >
+        {submitting ? 'Submitting...' : 'Submit Tutorial'}
       </button>
     </form>
   )
