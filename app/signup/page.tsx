@@ -24,7 +24,11 @@ export default function SignupPage() {
       },
     })
     if (signUpError) { setError(signUpError.message); return }
-    await supabase.from('profiles').insert({ id: data.user!.id, display_name: displayName })
+    const { error: profileError } = await supabase.from('profiles').insert({
+      id: data.user!.id,
+      display_name: displayName,
+    })
+    if (profileError) { setError(profileError.message); return }
     router.push('/')
   }
 
