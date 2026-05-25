@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import TutorialCard from '@/components/TutorialCard'
 import type { Tutorial } from '@/lib/supabase'
-import { createClient } from '@/lib/supabase'
+import { createClient } from '@/lib/supabase-server'
 
 export const dynamic = 'force-dynamic'
 
