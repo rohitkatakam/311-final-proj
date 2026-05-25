@@ -22,6 +22,12 @@
   z-index: 9999;
 }
 
+/* Default focus ring — visible in all themes */
+:focus-visible {
+  outline: 3px solid #005fcc;
+  outline-offset: 2px;
+}
+
 /* High contrast mode */
 html.high-contrast {
   background-color: #000000;
