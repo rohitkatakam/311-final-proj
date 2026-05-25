@@ -3,6 +3,8 @@ import TutorialCard from '@/components/TutorialCard'
 import type { Tutorial } from '@/lib/supabase'
 import { createClient } from '@/lib/supabase'
 
+export const dynamic = 'force-dynamic'
+
 export const metadata: Metadata = {
   title: 'MakerAccess — Browse Tutorials',
 }
